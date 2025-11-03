@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Locutor Python - Conversor de Texto para Áudio</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-custom {
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+        }
+        .form-control:focus {
+            border-color: #2ecc71;
+            box-shadow: 0 0 0 0.25rem rgba(46, 204, 113, 0.25);
+        }
+        .btn-primary {
+            background-color: #2ecc71;
+            border-color: #2ecc71;
+        }
+        .btn-primary:hover {
+            background-color: #27ae60;
+            border-color: #27ae60;
+        }
+        .floating-feedback {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1050;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark gradient-custom">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-microphone-alt me-2"></i>
+                Locutor Python
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#helpModal">
+                            <i class="fas fa-question-circle me-1"></i>Ajuda
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <h2 class="text-center mb-4">
+                            <i class="fas fa-file-audio text-primary me-2"></i>
+                            Conversor de Texto para Áudio
+                        </h2>
+                        
+                        <form id="textToSpeechForm" class="needs-validation" novalidate>
+                            <div class="mb-4">
+                                <label for="inputText" class="form-label">Digite ou cole seu texto:</label>
+                                <textarea class="form-control" id="inputText" rows="10" required></textarea>
+                                <div class="invalid-feedback">
+                                    Por favor, insira algum texto para converter.
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-magic me-2"></i>
+                                    Converter para Áudio
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card mt-4 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-info-circle text-primary me-2"></i>
+                            Informações
+                        </h5>
+                        <ul class="list-unstyled mb-0">
+                            <li><i class="fas fa-check text-success me-2"></i>Suporta textos longos</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Pronúncia em português brasileiro</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Download automático do MP3</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Ajuda -->
+    <div class="modal fade" id="helpModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-question-circle text-primary me-2"></i>
+                        Como Usar
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <ol class="list-group list-group-numbered">
+                        <li class="list-group-item">Digite ou cole seu texto na área de texto</li>
+                        <li class="list-group-item">Clique no botão "Converter para Áudio"</li>
+                        <li class="list-group-item">Aguarde o processamento</li>
+                        <li class="list-group-item">O download iniciará automaticamente</li>
+                    </ol>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        É necessário ter conexão com a internet para usar o serviço.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback flutuante -->
+    <div class="floating-feedback" id="feedbackToast"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.getElementById('textToSpeechForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const text = document.getElementById('inputText').value.trim();
+            
+            if (!text) {
+                showToast('Por favor, insira um texto para converter.', 'danger');
+                return;
+            }
+
+            showToast('Iniciando conversão...', 'info');
+            
+            try {
+                const response = await fetch('/convert', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'Locucao.mp3';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    showToast('Áudio gerado com sucesso!', 'success');
+                } else {
+                    throw new Error('Falha na conversão');
+                }
+            } catch (error) {
+                showToast('Erro ao converter o texto. Tente novamente.', 'danger');
+                console.error('Erro:', error);
+            }
+        });
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast show bg-${type} text-white`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="toast-body">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 
+                                    type === 'danger' ? 'exclamation-circle' : 
+                                    'info-circle'} me-2"></i>
+                    ${message}
+                </div>
+            `;
+            
+            const container = document.getElementById('feedbackToast');
+            container.innerHTML = '';
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
