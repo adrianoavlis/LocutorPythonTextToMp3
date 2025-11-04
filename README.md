@@ -11,9 +11,9 @@ Aplicação web que converte textos em português para arquivos de áudio MP3 ut
 
 ## 📋 Pré-requisitos
 
-- Python 3.10 ou superior
-- Biblioteca gTTS
-- Conexão com internet (necessária para a síntese de voz)
+- Python 3.10 ou superior instalado 
+- Biblioteca gTTS instalado
+- Conexão com internet (necessária para a conversão e CDNs utilizados)
 
 ## 🔧 Instalação
 
@@ -48,6 +48,7 @@ http://localhost:8000
 
 - Python 3.10+
 - gTTS (Google Text-to-Speech)
+- VOSK (Speech-to-Text)
 - Bootstrap 5
 - HTML5/CSS3
 - JavaScript
